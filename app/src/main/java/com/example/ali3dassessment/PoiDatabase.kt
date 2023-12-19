@@ -17,7 +17,7 @@ public abstract class PoiDatabase: RoomDatabase(){
                 tmpInstance = Room.databaseBuilder(
                     ctx.applicationContext,
                     PoiDatabase::class.java,
-                    "PoiDatabase"
+                    "poiDatabase"
                 ).build()
                 instance = tmpInstance
 

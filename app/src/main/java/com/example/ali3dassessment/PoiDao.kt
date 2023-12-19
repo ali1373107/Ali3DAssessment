@@ -10,10 +10,10 @@ interface PoiDao {
     @Query("SELECT * FROM Poi WHERE featureType=:type")
     fun getPoiByType(type:String): LiveData<List<POI>>
     @Insert
-    fun insert(vararg poi: POI): LongArray
+   fun insert(vararg poi: POI): LongArray
     @Update
     fun update(poi:POI):Int
 
-    @Delete
-    fun delete(poi:POI):Int
+    @Query("DELETE FROM Poi")
+    fun deleteAll()
 }

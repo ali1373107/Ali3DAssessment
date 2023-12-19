@@ -4,9 +4,9 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 @Entity(tableName="Poi")
 data class POI (
-    @PrimaryKey val osm_Id: String,
+    @PrimaryKey val osm_id: Long,
     var name: String,
     var featureType: String,
-    val lat:Double,
-    val lon:Double
+    val lon:Double,
+    val lat:Double
 )

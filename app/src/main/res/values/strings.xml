@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Ali3DAssessment</string>
     <string name="UploadPOIfromURL">Upload POIs from URL</string>
+    <string name="PoisOnMap">Display POIs on Map</string>
+    <string name="MapFragment">Fragment Map\n</string>
+    <string name="delete">Delete POIs</string>
 </resources>
