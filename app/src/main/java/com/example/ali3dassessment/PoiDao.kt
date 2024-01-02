@@ -8,7 +8,7 @@ interface PoiDao {
     fun getAllpois(): LiveData<List<POI>>
 
     @Query("SELECT * FROM Poi WHERE featureType=:type")
-    fun getPoiByType(type:String): LiveData<List<POI>>
+    fun getPoiByType(type:String):LiveData<List<POI>>
     @Insert
    fun insert(vararg poi: POI): LongArray
     @Update

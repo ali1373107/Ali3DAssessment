@@ -40,6 +40,7 @@ android {
 }
 
 dependencies {
+    implementation (files("libs/app-debug2.aar"))
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
@@ -56,6 +57,15 @@ dependencies {
     implementation("com.github.kittinunf.fuel:fuel-json:2.3.1")
     implementation("com.github.kittinunf.fuel:fuel-android:2.3.1")
     implementation("com.github.kittinunf.fuel:fuel-gson:2.3.1")
-    implementation("androidx.fragment:fragment-ktx:1.5.2")
+    implementation("androidx.fragment:fragment-ktx:1.6.2")
+    implementation ("com.google.android.material:material:1.11.0")
+    implementation ("androidx.fragment:fragment-ktx:1.6.2")
+    implementation ("androidx.appcompat:appcompat:1.6.1")
+    implementation ("androidx.camera:camera-core:1.3.1")
+    implementation ("androidx.camera:camera-camera2:1.3.1")
+    implementation ("androidx.camera:camera-lifecycle:1.3.1")
+    implementation ("androidx.camera:camera-view:1.3.1")
+
+
 
 }

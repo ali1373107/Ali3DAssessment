@@ -4,4 +4,6 @@
     <string name="PoisOnMap">Display POIs on Map</string>
     <string name="MapFragment">Fragment Map\n</string>
     <string name="delete">Delete POIs</string>
+    <string name="go">Search</string>
+    <string name="defaultText">Pub</string>
 </resources>

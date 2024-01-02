@@ -7,6 +7,6 @@ data class POI (
     @PrimaryKey val osm_id: Long,
     var name: String,
     var featureType: String,
-    val lon:Double,
-    val lat:Double
+    var lon:Double,
+    var lat:Double
 )
