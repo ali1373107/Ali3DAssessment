@@ -17,6 +17,7 @@ import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 import javax.security.auth.callback.Callback
 
+
 class OpenGLView(ctx:Context, val textureAvailableCallback: (SurfaceTexture) ->Unit) :GLSurfaceView(ctx),GLSurfaceView.Renderer{
     init {
         setEGLContextClientVersion(2)
@@ -133,6 +134,7 @@ class OpenGLView(ctx:Context, val textureAvailableCallback: (SurfaceTexture) ->U
         }
     }
     //its called whenever the resolution changes (on a mobile device this ill occur when the device i rotated
+
     override fun onSurfaceChanged(unused: GL10, w: Int, h:Int){
         GLES20.glViewport(0,0,w,h)
         val hfov =60.0f
@@ -141,3 +143,4 @@ class OpenGLView(ctx:Context, val textureAvailableCallback: (SurfaceTexture) ->U
 
     }
 }
+

@@ -4,16 +4,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <EditText
-        android:id="@+id/filter_Edit_Text"
+        android:id="@+id/filter_Edit_Text1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Filter by type"/>
 
     <Button
-        android:id="@+id/filter_Button"
+        android:id="@+id/filter_Button1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Filter"/>
+        android:text="Display POIs"/>
     <org.osmdroid.views.MapView
         android:layout_width="match_parent"
         android:layout_height="match_parent"

@@ -14,60 +14,44 @@ import android.widget.Toast
 import android.content.BroadcastReceiver // For part b of the 2nd question
 import android.content.IntentFilter // For part b of the 2nd question
 import android.content.pm.PackageManager
+import android.util.Log
 import androidx.core.app.ActivityCompat
 
 class MyGPSService: Service(), LocationListener {
 
-    lateinit var receiver: BroadcastReceiver
+
     var mgr: LocationManager? = null
 
     // Need this for storing the new location when the user's location changes
-    val latLon = LatLon()
-    var checkPermission = false
-
-    // The following code is related to binding the service to the main activity
     inner class GPSServiceBinder(val GPS_Service: MyGPSService): android.os.Binder()
-
+    var lat = 0.0
+    var lon = 0.0
+    // The following code is related to binding the service to the main activity
+    var checkPermission = false
     // Start handler
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.d("MyTag", "onStartCommand")
+
+
+        mgr = this.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         checkPermission = true
-
-        val receiverFilter = IntentFilter().apply {
-            addAction("StartSignal")
-            addAction("StopSignal")
-        }
-        receiver = object: BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                when (intent?.action) {
-                    "StartSignal" -> {
-                        startGps()
-                    }
-                    "StopSignal" -> {
-                        stopGps()
-                    }
-                }
-            }
-        }
-        registerReceiver(receiver, receiverFilter)
-
-        // Do something here, e.g. start GPS, or music playing, etc.
-        //startGps()
-
+        // start GPS,
+        startGps()
         return START_STICKY // --> Important if you want the service to be restarted
     }
 
-    /*
-    bind handler - not needed in many cases but defined as an abstract method
-    in Service, therefore must be overridden
-    */
+
     override fun onBind(intent: Intent?): IBinder? {
         //return null // This is temporary, but needs to be changed so that the service can be bound to the Activity
         return GPSServiceBinder(this)
     }
 
+    override fun onDestroy() {
+        stopGps()
+        super.onDestroy()
+    }
     fun startGps() {
-        mgr = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        if (checkPermission) {
+        if (checkPermission==true) {
             mgr?.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0f, this)
         }
     }
@@ -79,14 +63,17 @@ class MyGPSService: Service(), LocationListener {
     }
 
     override fun onLocationChanged(newLoc: Location) {
-        latLon.lat = newLoc.latitude
-        latLon.lon = newLoc.longitude
+        lat = newLoc.latitude
+        lon = newLoc.longitude
+        Log.d("MyTag", "onLocationChanged${newLoc.latitude} ${newLoc.longitude}")
 
         // Send the above data in a broadcast instead
         val broadcast = Intent().apply {
-            action = "sendLocationCoords"
-            putExtra("Servicelatitude", newLoc.latitude)
-            putExtra("Servicelongitude", newLoc.longitude)
+            action = "sendLocation"
+            putExtra("Servicelat", newLoc.latitude)
+            putExtra("Servicelon", newLoc.longitude)
+
+
         }
         sendBroadcast(broadcast)
     }
