@@ -2,12 +2,16 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    >
+
     <EditText
         android:id="@+id/filter_Edit_Text1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Filter by type"/>
+        android:hint="Filter by type"
+        android:background="@color/white"
+        />
 
     <Button
         android:id="@+id/filter_Button1"
@@ -18,6 +22,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:enabled="true"
+        android:background="@color/white"
         android:clickable="true"
         android:id="@+id/map1"
         tilesource="Mapnik"

@@ -10,4 +10,6 @@
         android:id="@+id/action_map"
         android:title="Display On the Map"
         />
+    <item android:id="@+id/camera" android:title="Open GL Camera"/>
+
 </menu>

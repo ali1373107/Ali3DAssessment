@@ -2,6 +2,7 @@ package com.example.ali3dassessment
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.AlertDialog
 import android.app.Notification
 import android.app.NotificationChannel
@@ -20,6 +21,7 @@ import android.view.MenuItem
 
 import android.widget.FrameLayout
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -76,7 +78,7 @@ class MainActivity : AppCompatActivity() {
                         poiViewModel.lon= newlon
                         Log.d("MyTag","latvm${poiViewModel.lat}")
                         Log.d("MyTag","lonvm${poiViewModel.lon}")
-                       // updateLocationOperations(newlat, newlon)
+                       // updateLocationOperations(lat, lon )
 
 
                     }
@@ -86,8 +88,8 @@ class MainActivity : AppCompatActivity() {
         registerReceiver(receiver, filter)
 
     }
-    private fun updateLocationOperations() {
 
+    private fun updateLocationOperations() {
         lon = poiViewModel.lon
         lat = poiViewModel.lat
         Log.d("MyTag", "lonbbox${lon}")
@@ -163,12 +165,7 @@ class MainActivity : AppCompatActivity() {
                                        }
 
                                    }
-
-
-
                        }
-
-
             }
 
             R.id.deletePOI -> {
@@ -194,7 +191,14 @@ class MainActivity : AppCompatActivity() {
                     .addToBackStack(null)
                     .commit()
                 return true
-            }
+            }R.id.camera -> {
+            val glviewFrag = GLViewFragment()
+            supportFragmentManager.beginTransaction()
+                .replace(android.R.id.content, glviewFrag )
+                .addToBackStack(null)
+                .commit()
+            return true
+        }
 
             }
 

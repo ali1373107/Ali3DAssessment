@@ -34,6 +34,5 @@ class PoiViewModel(application: Application) : AndroidViewModel(application) {
 // Use 'value' to update LiveData
 
             _poiList.postValue(updatedList) }
-// Method to delete all POIs
     }
 }

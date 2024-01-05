@@ -3,7 +3,6 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id ("kotlin-kapt")
 }
-
 android {
     namespace = "com.example.ali3dassessment"
     compileSdk = 34
@@ -20,7 +19,6 @@ android {
             useSupportLibrary = true
         }
     }
-
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -38,10 +36,8 @@ android {
         jvmTarget = "1.8"
     }
 }
-
 dependencies {
     implementation (files("libs/app-debug2.aar"))
-
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
     implementation("androidx.appcompat:appcompat:1.6.1")
@@ -65,5 +61,4 @@ dependencies {
     implementation ("androidx.camera:camera-camera2:1.3.1")
     implementation ("androidx.camera:camera-lifecycle:1.3.1")
     implementation ("androidx.camera:camera-view:1.3.1")
-
 }
