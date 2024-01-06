@@ -54,11 +54,9 @@ dependencies {
     implementation("com.github.kittinunf.fuel:fuel-android:2.3.1")
     implementation("com.github.kittinunf.fuel:fuel-gson:2.3.1")
     implementation("androidx.fragment:fragment-ktx:1.6.2")
-    implementation ("com.google.android.material:material:1.11.0")
-    implementation ("androidx.fragment:fragment-ktx:1.6.2")
-    implementation ("androidx.appcompat:appcompat:1.6.1")
     implementation ("androidx.camera:camera-core:1.3.1")
     implementation ("androidx.camera:camera-camera2:1.3.1")
     implementation ("androidx.camera:camera-lifecycle:1.3.1")
     implementation ("androidx.camera:camera-view:1.3.1")
+
 }

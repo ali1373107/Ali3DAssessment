@@ -14,19 +14,10 @@ import com.example.ali3dassessment.geo.Algorithms
 import com.example.ali3dassessment.geo.EastNorth
 import com.example.ali3dassessment.geo.SphericalMercatorProjection
 class POIAdapter(private var pois: List<POI>, private val context: Context,private val poiViewModel: PoiViewModel) : RecyclerView.Adapter<POIAdapter.ViewHolder>() {
-  //  lateinit var channel: NotificationChannel
-  //  var notificationId = 1
-//    val channelID = "POI"
+
     var proj = SphericalMercatorProjection()
 
-    init {
-// Initialize notification channel in the constructor
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        //    channel = NotificationChannel(channelID, "POI", NotificationManager.IMPORTANCE_DEFAULT)
-         //   val nMgr = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-          //  nMgr.createNotificationChannel(channel)
-        }
-    }
+
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val nameTextView: TextView = itemView.findViewById(R.id.nameTextView)
         val typeTextView: TextView = itemView.findViewById(R.id.typeTextView)
@@ -57,9 +48,7 @@ class POIAdapter(private var pois: List<POI>, private val context: Context,priva
         holder.nameTextView.text = poi.name
         holder.typeTextView.text = poi.featureType
         holder.distancetextView.text = formattedDist
-      //  if(dist < 50000) {
-       //     sendNotification(poi.name)
-        //}
+
 // Bind other properties as needed
     }
     override fun getItemCount(): Int {
@@ -69,18 +58,5 @@ class POIAdapter(private var pois: List<POI>, private val context: Context,priva
         pois = newPois
         notifyDataSetChanged()
     }
-  /*
-    private fun sendNotification(pName: String) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notification = Notification.Builder(context, channelID)
-                .setContentTitle("Nearby POIs")
-                .setContentText("New Location is now ${pName}")
-                .setSmallIcon(R.drawable.peak)
-                .build()
-            val nMgr = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            nMgr.notify(notificationId++, notification) // uniqueId is a unique ID for this notification
-        }
-    }
 
-   */
 }

@@ -7,8 +7,10 @@ import android.app.AlertDialog
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
+
 
 import android.content.Intent
 import android.content.IntentFilter
@@ -40,11 +42,22 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-
+import android.content.*
+import android.graphics.SurfaceTexture
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import android.view.Surface
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.Preview
+import androidx.camera.core.SurfaceRequest
+import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.core.app.NotificationCompat
+import freemap.openglwrapper.GLMatrix
 
 class MainActivity : AppCompatActivity() {
 
-    lateinit var poiAdapter: POIAdapter
     lateinit var db: PoiDatabase
     var proj = SphericalMercatorProjection()
     val listPoi1 = mutableListOf<POI>()
@@ -52,14 +65,26 @@ class MainActivity : AppCompatActivity() {
     lateinit var receiver: BroadcastReceiver
     val poiViewModel: PoiViewModel by viewModels()
     var permissionsGranted = false
-    var lon= 0.0
-    var lat= 0.0
+    var lon = 0.0
+    var lat = 0.0
+    lateinit var channel: NotificationChannel
+    var notificationId = 1
+    val channelID = "POI"
+
+    var cameraFeedSurfaceTexure: SurfaceTexture? = null
+    lateinit var glView: OpenGLView
+
+    // Declaring our sensor variables as attributes of the Main Activity
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         db = PoiDatabase.getDatabase(application)
+
+        // Creating a sensor manager and initialising our sensors properly
+
+
 
         requestPermissions()
 
@@ -68,17 +93,17 @@ class MainActivity : AppCompatActivity() {
             addAction("sendLocation")
         }
 
-        receiver = object: BroadcastReceiver() {
+        receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 when (intent?.action) {
                     "sendLocation" -> {
                         val newlat = intent.getDoubleExtra("Servicelat", 0.0)
                         val newlon = intent.getDoubleExtra("Servicelon", 0.0)
                         poiViewModel.lat = newlat
-                        poiViewModel.lon= newlon
-                        Log.d("MyTag","latvm${poiViewModel.lat}")
-                        Log.d("MyTag","lonvm${poiViewModel.lon}")
-                       // updateLocationOperations(lat, lon )
+                        poiViewModel.lon = newlon
+                        Log.d("MyTag", "latvm${poiViewModel.lat}")
+                        Log.d("MyTag", "lonvm${poiViewModel.lon}")
+                        // updateLocationOperations(lat, lon )
 
 
                     }
@@ -86,6 +111,16 @@ class MainActivity : AppCompatActivity() {
             }
         }
         registerReceiver(receiver, filter)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            channel = NotificationChannel(
+                channelID,
+                "POIs Nearby",
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
+            val nMgr = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+            nMgr.createNotificationChannel(channel)
+        }
 
     }
 
@@ -111,7 +146,7 @@ class MainActivity : AppCompatActivity() {
                             "NO POIs Nearby",
                             Toast.LENGTH_SHORT
                         ).show()
-                    }else {
+                    } else {
                         // Handle the list of POIs here
                         for (poi in listPoi) {
                             Log.d("POI", "${poi.osm_id}")
@@ -126,47 +161,55 @@ class MainActivity : AppCompatActivity() {
             )
         }
     }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu, menu)
         return true
     }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
 
-            R.id.upload_from_url ->{
+            R.id.upload_from_url -> {
 
-               lifecycleScope.launch{
-                   withContext(Dispatchers.IO){
-                       updateLocationOperations()
-                                       for(poi in listPoi1){
-                                           val existingPoi = db.PoiDao().getPoiById(poi.osm_id)
-                                           if(existingPoi == null) {
-                                               Log.d("POI", "${poi}")
-                                               val poiLon = poi.lon
-                                               val poiLat = poi.lat
-                                               val p = LonLat(poiLon, poiLat)
-                                               val en = proj.project(p)
-                                               val Poi = POI(
-                                                   osm_id = poi.osm_id,
-                                                   name = poi.name,
-                                                   featureType = poi.featureType,
-                                                   lon = en.easting,
-                                                   lat = en.northing
-                                               )
-                                               Log.d("es en", "converted: ${Poi}")
-                                               db.PoiDao().insert(Poi)
-                                           }else {
-                                               // Handle the case where the POI already exists (update or skip)
-                                               // You can update the existing record or handle it according to your requirements
-                                               Log.d("POI", "existedID:${existingPoi.osm_id}")
+                lifecycleScope.launch {
+                    withContext(Dispatchers.IO) {
+                        updateLocationOperations()
+                        for (poi in listPoi1) {
+                            // check for existing poi w
+                            val existingPoi = db.PoiDao().getPoiById(poi.osm_id)
+                            if (existingPoi == null) {
+                                Log.d("POI", "${poi}")
+                                val poiLon = poi.lon
+                                val poiLat = poi.lat
+                                val p = LonLat(poiLon, poiLat)
+                                val en = proj.project(p)
+                                val Poi = POI(
+                                    osm_id = poi.osm_id,
+                                    name = poi.name,
+                                    featureType = poi.featureType,
+                                    lon = en.easting,
+                                    lat = en.northing
+                                )
+                                Log.d("es en", "converted: ${Poi}")
+                                db.PoiDao().insert(Poi)
 
-                                           }
+                            } else {
+                                // Handle the case where the POI already exists (update or skip)
+                                // You can update the existing record or handle it according to your requirements
+                                Log.d("POI", "existedID:${existingPoi.osm_id}")
 
-                                       }
+                            }
 
-                                   }
-                       }
+                        }
+
+                    }
+
+
+                }
+
             }
+
 
             R.id.deletePOI -> {
                 lifecycleScope.launch {
@@ -176,6 +219,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
+
             R.id.action_map -> {
                 val mapFrag = MapFragment()
                 supportFragmentManager.beginTransaction()
@@ -183,50 +227,79 @@ class MainActivity : AppCompatActivity() {
                     .addToBackStack(null)
                     .commit()
                 return true
-                }
-            R.id.action_poi ->{
+            }
+
+            R.id.action_poi -> {
                 val recycleFrag = PoiFragment()
                 supportFragmentManager.beginTransaction()
                     .replace(android.R.id.content, recycleFrag)
                     .addToBackStack(null)
                     .commit()
                 return true
-            }R.id.camera -> {
-            val glviewFrag = GLViewFragment()
-            supportFragmentManager.beginTransaction()
-                .replace(android.R.id.content, glviewFrag )
-                .addToBackStack(null)
-                .commit()
-            return true
-        }
+            }
 
+            R.id.camera -> {
+                val glviewFrag = GLViewFragment()
+                supportFragmentManager.beginTransaction()
+                    .replace(android.R.id.content, glviewFrag)
+                    .addToBackStack(null)
+                    .commit()
+                return true
             }
 
 
+        }
         return false
 
     }
 
+
     fun requestPermissions() {
-        if (ContextCompat.checkSelfPermission(this, LOCATION_SERVICE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 0)
+        if (ContextCompat.checkSelfPermission(
+                this,
+                LOCATION_SERVICE
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                0
+            )
         } else {
             permissionsGranted = true
             initService()
         }
     }
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if(requestCode == 0 && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (requestCode == 0 && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             permissionsGranted = true
             initService()
+
         } else {
 
-            AlertDialog.Builder(this).setPositiveButton("OK", null).setMessage("GPS permission denied").show()
+            AlertDialog.Builder(this).setPositiveButton("OK", null)
+                .setMessage("GPS permission denied").show()
+        }
+    }
+
+    private fun sendNotification(poiName: String, type: String) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notification = Notification.Builder(this@MainActivity, channelID)
+                .setContentTitle("Pois Nearby")
+                .setContentText("Name - ${poiName} Distance - ${type}")
+                .setSmallIcon(R.drawable.peak)
+                .build()
+            val nMgr = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            nMgr.notify(
+                notificationId++,
+                notification
+            ) // uniqueId is a unique ID for this notification
         }
     }
 

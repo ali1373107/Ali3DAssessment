@@ -14,7 +14,6 @@ class PoiViewModel(application: Application) : AndroidViewModel(application) {
     // Use MutableLiveData for dynamic updates
     private val _poiList = MutableLiveData<List<POI>>()
     val allPois: LiveData<List<POI>> = _poiList
-    private val editTextContent = MutableLiveData<String>()
     var lat: Double =  0.0
     var lon: Double = 0.0
     init {
@@ -25,6 +24,7 @@ class PoiViewModel(application: Application) : AndroidViewModel(application) {
 
     public fun getPoisByType() {
         viewModelScope.launch(Dispatchers.IO) {
+            // we use view model poitype to search by type
            val updatedList = if (poitype=="") {
                 db.PoiDao().getAllpois()
             } else {
