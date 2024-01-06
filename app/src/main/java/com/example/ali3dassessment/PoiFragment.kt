@@ -43,17 +43,17 @@ class PoiFragment : Fragment(R.layout.poi_item) {
             val userInput = filterEditText.text.toString()
             poiViewModel.poitype = userInput
             poiViewModel.getPoisByType()
-            loadAndDisplayPoisFromDatabase(userInput)
+            observeAllPoisList()
         }
 
         // Load and display all POIs initially
-        loadAndDisplayPoisFromDatabase("")
+        observeAllPoisList()
 
         return view
     }
 
-    private fun loadAndDisplayPoisFromDatabase(type: String) {
-        poiViewModel.poitype = type
+    private fun observeAllPoisList() {
+
         poiViewModel.allPois.observe(viewLifecycleOwner, { pois ->
             // Update RecyclerView with data from the database
             poiAdapter.updateData(pois)

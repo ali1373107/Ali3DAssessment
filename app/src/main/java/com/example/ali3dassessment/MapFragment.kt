@@ -51,9 +51,32 @@ class MapFragment : Fragment(R.layout.mapfrag) {
         val view = inflater.inflate(R.layout.mapfrag, container, false)
         map1 = view.findViewById(R.id.map1)
         map1.controller.setZoom(16.0)
+
         map1.controller.setCenter(GeoPoint(50.9, -1.4))
 
 
+            val filterButton = view.findViewById<Button>(R.id.filter_Button1)
+            val filterEditText = view.findViewById<EditText>(R.id.filter_Edit_Text1)
+            filterButton.setOnClickListener {
+                Log.d("Button", "Clicked")
+
+                var filterText = filterEditText.text.toString()
+                poiViewModel.poitype = filterText
+                poiViewModel.getPoisByType()
+
+                Log.d("Button", "Filter Text VM2: ${poiViewModel.poitype}")
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    channel = NotificationChannel(
+                        channelID,
+                        "POIs nearby",
+                        NotificationManager.IMPORTANCE_DEFAULT
+                    )
+                    val nMgr = requireContext().getSystemService(AppCompatActivity.NOTIFICATION_SERVICE) as NotificationManager
+
+                    nMgr.createNotificationChannel(channel)
+                }
+
+            }
         poiViewModel.allPois.observe(viewLifecycleOwner) { pois ->
 
             val items = mutableListOf<OverlayItem>()
@@ -96,46 +119,17 @@ class MapFragment : Fragment(R.layout.mapfrag) {
                 }
 
             }
-
-                overlay = ItemizedIconOverlay(requireContext(), items, null)
-                map1.overlays.add(overlay)
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    channel = NotificationChannel(
-                        channelID,
-                        "POIs nearby",
-                        NotificationManager.IMPORTANCE_DEFAULT
-                    )
-                    val nMgr = requireContext().getSystemService(AppCompatActivity.NOTIFICATION_SERVICE) as NotificationManager
-
-                    nMgr.createNotificationChannel(channel)
-                }
-
-                for (poi in pois) {
-                    Log.d("poisd", "${poi}")
-                }
-
+            if(Build.VERSION.SDK_INT >=Build.VERSION_CODES.O)  {
+                channel = NotificationChannel(channelID, "POI DETECTED", NotificationManager.IMPORTANCE_DEFAULT)
+                val nMgr = requireContext().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                nMgr.createNotificationChannel(channel)
             }
 
+            overlay = ItemizedIconOverlay(requireContext(), items, null)
+            map1.overlays.add(overlay)
 
 
-            val filterButton = view.findViewById<Button>(R.id.filter_Button1)
-            val filterEditText = view.findViewById<EditText>(R.id.filter_Edit_Text1)
-            filterButton.setOnClickListener {
-                Log.d("Button", "Clicked")
-
-                var filterText = filterEditText.text.toString()
-                poiViewModel.poitype = filterText
-                poiViewModel.getPoisByType()
-
-                Log.d("Button", "Filter Text VM2: ${poiViewModel.poitype}")
-                if(Build.VERSION.SDK_INT >=Build.VERSION_CODES.O)  {
-                    channel = NotificationChannel(channelID, "POI DETECTED", NotificationManager.IMPORTANCE_DEFAULT)
-                    val nMgr = requireContext().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                    nMgr.createNotificationChannel(channel)
-                }
-
-            }
+        }
             return view
         }
 

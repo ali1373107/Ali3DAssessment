@@ -103,9 +103,6 @@ class MainActivity : AppCompatActivity() {
                         poiViewModel.lon = newlon
                         Log.d("MyTag", "latvm${poiViewModel.lat}")
                         Log.d("MyTag", "lonvm${poiViewModel.lon}")
-                        // updateLocationOperations(lat, lon )
-
-
                     }
                 }
             }

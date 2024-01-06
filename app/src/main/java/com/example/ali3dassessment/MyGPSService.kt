@@ -26,7 +26,6 @@ class MyGPSService: Service(), LocationListener {
     inner class GPSServiceBinder(val GPS_Service: MyGPSService): android.os.Binder()
     var lat = 0.0
     var lon = 0.0
-    // The following code is related to binding the service to the main activity
     var checkPermission = false
     // Start handler
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -66,7 +65,6 @@ class MyGPSService: Service(), LocationListener {
         lat = newLoc.latitude
         lon = newLoc.longitude
         Log.d("MyTag", "onLocationChanged${newLoc.latitude} ${newLoc.longitude}")
-
         // Send the above data in a broadcast instead
         val broadcast = Intent().apply {
             action = "sendLocation"
