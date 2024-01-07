@@ -7,15 +7,12 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.media.VolumeShaper
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.Surface
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.Preview
@@ -24,10 +21,12 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import freemap.openglwrapper.GLMatrix
 
 class GLViewFragment : Fragment(R.layout.frag_glview), SensorEventListener {
+
+    var cameraFeedSurfaceTexure: SurfaceTexture? = null
+
     private var cameraPermission = false
     private var surfaceTexture: SurfaceTexture? = null
     private lateinit var glView: OpenGLView
@@ -44,8 +43,10 @@ class GLViewFragment : Fragment(R.layout.frag_glview), SensorEventListener {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        glView = OpenGLView(requireContext()){
+
+        glView = OpenGLView(requireContext(),viewLifecycleOwner) {
             surfaceTexture = it
+
         }
         return glView
     }

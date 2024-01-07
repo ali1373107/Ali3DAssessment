@@ -16,16 +16,29 @@ import android.content.IntentFilter // For part b of the 2nd question
 import android.content.pm.PackageManager
 import android.util.Log
 import androidx.core.app.ActivityCompat
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.fragment.app.activityViewModels
+import com.example.ali3dassessment.PoiViewModel
+
 
 class MyGPSService: Service(), LocationListener {
 
+    private lateinit var poiViewModel: PoiViewModel
 
     var mgr: LocationManager? = null
-
+    override fun onCreate() {
+        super.onCreate()
+        poiViewModel = PoiViewModel(application) // Initialize your ViewModel here
+    }
     // Need this for storing the new location when the user's location changes
     inner class GPSServiceBinder(val GPS_Service: MyGPSService): android.os.Binder()
-    var lat = 0.0
-    var lon = 0.0
+ //   var lat = 0.0
+  //  var lon = 0.0
+
+
+
     var checkPermission = false
     // Start handler
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -62,8 +75,6 @@ class MyGPSService: Service(), LocationListener {
     }
 
     override fun onLocationChanged(newLoc: Location) {
-        lat = newLoc.latitude
-        lon = newLoc.longitude
         Log.d("MyTag", "onLocationChanged${newLoc.latitude} ${newLoc.longitude}")
         // Send the above data in a broadcast instead
         val broadcast = Intent().apply {

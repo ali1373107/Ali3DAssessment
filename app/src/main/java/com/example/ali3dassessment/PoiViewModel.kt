@@ -14,10 +14,19 @@ class PoiViewModel(application: Application) : AndroidViewModel(application) {
     // Use MutableLiveData for dynamic updates
     private val _poiList = MutableLiveData<List<POI>>()
     val allPois: LiveData<List<POI>> = _poiList
-    var lat: Double =  0.0
-    var lon: Double = 0.0
+    private val _lat = MutableLiveData<Double>()
+    var lat1: LiveData<Double> = _lat
+
+    private val _lon = MutableLiveData<Double>()
+    var lon1: LiveData<Double> = _lon
     init {
         getPoisByType()
+    }
+    public fun updateLatLon(newLat: Double, newLon: Double) {
+        // Example logic to set lat and lon
+        _lat.postValue(newLat)  // Example latitude (replace with your actual logic)
+        _lon.postValue(newLon) // Example longitude (replace with your actual logic)
+
     }
 
 // Return the LiveData for observation
@@ -34,5 +43,6 @@ class PoiViewModel(application: Application) : AndroidViewModel(application) {
 // Use 'value' to update LiveData
 
             _poiList.postValue(updatedList) }
+
     }
 }

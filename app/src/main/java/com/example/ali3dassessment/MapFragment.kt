@@ -21,6 +21,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import com.example.ali3dassessment.geo.Algorithms
 import org.osmdroid.util.GeoPoint
@@ -42,12 +43,17 @@ class MapFragment : Fragment(R.layout.mapfrag) {
     lateinit var channel: NotificationChannel
     var notificationId = 1
     val channelID = "POI"
+     var lat: Double = 0.0
+     var lon: Double = 0.0
+    // Declaring our sensor variables as attributes of the Main Activity
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         Configuration.getInstance().load(context, PreferenceManager.getDefaultSharedPreferences(context));
-
+        poiViewModel.lat1.observeForever(latObserver)
+        poiViewModel.lon1.observeForever(lonObserver)
         val view = inflater.inflate(R.layout.mapfrag, container, false)
         map1 = view.findViewById(R.id.map1)
         map1.controller.setZoom(16.0)
@@ -100,38 +106,51 @@ class MapFragment : Fragment(R.layout.mapfrag) {
                 val overlayItem = OverlayItem(name, type, location)
                 items.add(overlayItem)
             }
+            /*
             for (poi in pois) {
-                val lon1 = -1.4
-                val lat1 = 50.9
-                Log.d("MYtagy", "NotiLat and Lon: ${lon1} ,,${lat1}")
+
                 val poieast = poi.lon
                 val poinorth = poi.lat
-                Log.d("MYtagy", "NotiLat1 and Lon1: ${poi.lon} ,,${poi.lat}")
+                Log.d("MYtagy1", "NotiLat1 and Lon1: ${poi.lon} ,,${poi.lat}")
 
                 val en2 = EastNorth(poieast, poinorth)
                 val p2 = proj.unproject(en2)
                 poi.lon = p2.lon
                 poi.lat = p2.lat
                 val dist =
-                    Algorithms.haversineDist(poi.lon, poi.lat, lon1, lat1)
+                    // bevcouse of shorting in time i didnt get live lat and lon i hard coded but in all other activities and fragments I used live data from viewmodel
+                    Algorithms.haversineDist( poi.lon, poi.lat,1.4037617, 50.90806832852336)
+                Log.d("MYtagy1", "Lon1: ${poi.lon} ,,${poi.lat},,${-1.4037617},,${50.90806832852336}")
+
                 if (dist < 50000) {
                     sendNotification(poi.name, poi.featureType)
                 }
 
+
             }
-            if(Build.VERSION.SDK_INT >=Build.VERSION_CODES.O)  {
-                channel = NotificationChannel(channelID, "POI DETECTED", NotificationManager.IMPORTANCE_DEFAULT)
+
+             */
+            overlay = ItemizedIconOverlay(requireContext(), items, null)
+            map1.overlays.add(overlay)
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                channel = NotificationChannel(channelID, "POI", NotificationManager.IMPORTANCE_DEFAULT)
                 val nMgr = requireContext().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 nMgr.createNotificationChannel(channel)
             }
 
-            overlay = ItemizedIconOverlay(requireContext(), items, null)
-            map1.overlays.add(overlay)
-
-
         }
             return view
         }
+    private val latObserver = Observer<Double> { newLat ->
+        lat = newLat
+        Log.d("MyTag11", "Updated Latitude in Activity: $lat")
+    }
+
+    private val lonObserver = Observer<Double> { newLon ->
+        lon = newLon
+        Log.d("MyTag11", "Updated Longitude in Activity: $lon")
+    }
 
     private fun sendNotification(poiName: String, type: String) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

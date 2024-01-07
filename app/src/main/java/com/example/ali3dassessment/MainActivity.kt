@@ -54,7 +54,9 @@ import androidx.camera.core.Preview
 import androidx.camera.core.SurfaceRequest
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.NotificationCompat
+import androidx.lifecycle.Observer
 import freemap.openglwrapper.GLMatrix
+import org.osmdroid.views.overlay.ItemizedIconOverlay
 
 class MainActivity : AppCompatActivity() {
 
@@ -63,17 +65,17 @@ class MainActivity : AppCompatActivity() {
     val listPoi1 = mutableListOf<POI>()
     var service: MyGPSService? = null
     lateinit var receiver: BroadcastReceiver
-    val poiViewModel: PoiViewModel by viewModels()
+    private val poiViewModel: PoiViewModel by viewModels()
+
     var permissionsGranted = false
-    var lon = 0.0
-    var lat = 0.0
+
     lateinit var channel: NotificationChannel
     var notificationId = 1
     val channelID = "POI"
 
     var cameraFeedSurfaceTexure: SurfaceTexture? = null
-    lateinit var glView: OpenGLView
-
+    private var lat: Double = 0.0
+    private var lon: Double = 0.0
     // Declaring our sensor variables as attributes of the Main Activity
 
 
@@ -81,7 +83,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         db = PoiDatabase.getDatabase(application)
-
+        poiViewModel.lat1.observe(this, latObserver)
+        poiViewModel.lon1.observe(this, lonObserver)
         // Creating a sensor manager and initialising our sensors properly
 
 
@@ -97,12 +100,13 @@ class MainActivity : AppCompatActivity() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 when (intent?.action) {
                     "sendLocation" -> {
-                        val newlat = intent.getDoubleExtra("Servicelat", 0.0)
-                        val newlon = intent.getDoubleExtra("Servicelon", 0.0)
-                        poiViewModel.lat = newlat
-                        poiViewModel.lon = newlon
-                        Log.d("MyTag", "latvm${poiViewModel.lat}")
-                        Log.d("MyTag", "lonvm${poiViewModel.lon}")
+                        var newlat = intent.getDoubleExtra("Servicelat", 0.0)
+                        var newlon = intent.getDoubleExtra("Servicelon", 0.0)
+                   //     updateLocationOperations(newlat,newlon)
+                        poiViewModel.updateLatLon(newlat, newlon)
+
+                        Log.d("MyTag", "latvm${newlat}")
+                        Log.d("MyTag", "lonvm${newlon}")
                     }
                 }
             }
@@ -110,27 +114,37 @@ class MainActivity : AppCompatActivity() {
         registerReceiver(receiver, filter)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            channel = NotificationChannel(
-                channelID,
-                "POIs Nearby",
-                NotificationManager.IMPORTANCE_DEFAULT
-            )
-            val nMgr = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+            channel = NotificationChannel(channelID, "POI", NotificationManager.IMPORTANCE_DEFAULT)
+            val nMgr = getSystemService(Context.NOTIFICATION_SERVICE)as NotificationManager
             nMgr.createNotificationChannel(channel)
         }
 
     }
 
+
+    private val latObserver = Observer<Double> { newLat ->
+        // Update your local variable or perform any action
+        lat = newLat
+        Log.d("MyTag11", "Updated Latitude in Activity: $lat")
+    }
+
+    private val lonObserver = Observer<Double> { newLon ->
+        // Update your local variable or perform any action
+        lon = newLon
+        Log.d("MyTag11", "Updated Longitude in Activity: $lon")
+    }
+
+
     private fun updateLocationOperations() {
-        lon = poiViewModel.lon
-        lat = poiViewModel.lat
-        Log.d("MyTag", "lonbbox${lon}")
-        Log.d("MyTag", "latbbox${lat}")
+
+        Log.d("MyTag1", "lonbbox${lon}")
+        Log.d("MyTag1", "latbbox${lat}")
         var west = lon - 0.01
         var east = lon + 0.01
         var south = lat - 0.01
         var north = lat + 0.01
         var bbox = "$west,$south,$east,$north"
+        Log.d("MyTag1", "latbbox${bbox}")
 
         var url1 = "https://hikar.org/webapp/map?bbox=${bbox}&layers=poi&outProj=4326&format=json"
         url1.httpGet().responseObject<List<POI>> { _, _, result ->
@@ -157,6 +171,7 @@ class MainActivity : AppCompatActivity() {
                 }
             )
         }
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -172,7 +187,9 @@ class MainActivity : AppCompatActivity() {
                 lifecycleScope.launch {
                     withContext(Dispatchers.IO) {
                         updateLocationOperations()
-                        for (poi in listPoi1) {
+                        val copyList = ArrayList(listPoi1)
+
+                        for (poi in copyList) {
                             // check for existing poi w
                             val existingPoi = db.PoiDao().getPoiById(poi.osm_id)
                             if (existingPoi == null) {
@@ -285,20 +302,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun sendNotification(poiName: String, type: String) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notification = Notification.Builder(this@MainActivity, channelID)
-                .setContentTitle("Pois Nearby")
-                .setContentText("Name - ${poiName} Distance - ${type}")
-                .setSmallIcon(R.drawable.peak)
-                .build()
-            val nMgr = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            nMgr.notify(
-                notificationId++,
-                notification
-            ) // uniqueId is a unique ID for this notification
-        }
+    override fun onResume() {
+        super.onResume()
+
     }
+
+
 
 
     @SuppressLint("MissingPermission")
