@@ -171,7 +171,7 @@ class OpenGLView(ctx:Context, val lifecycleOwner: LifecycleOwner,
             GLES20.glEnable(GLES20.GL_DEPTH_TEST)
             viewMatrix.setAsIdentityMatrix()
             viewMatrix.rotateAboutAxis(-camera.rotation,'y')
-            //viewMatrix.translate(0.0f,0.0f, -2.0f)
+
             viewMatrix.translate(-camera.position.x,-camera.position.y,-camera.position.z)
 
             // setting the view matrix to the identity matrix so that it has no effect initially.
