@@ -106,8 +106,9 @@ class MapFragment : Fragment(R.layout.mapfrag) {
                 val overlayItem = OverlayItem(name, type, location)
                 items.add(overlayItem)
             }
-            /*
-            for (poi in pois) {
+            val copyList = ArrayList(pois)
+
+            for (poi in copyList) {
 
                 val poieast = poi.lon
                 val poinorth = poi.lat
@@ -118,18 +119,13 @@ class MapFragment : Fragment(R.layout.mapfrag) {
                 poi.lon = p2.lon
                 poi.lat = p2.lat
                 val dist =
-                    // bevcouse of shorting in time i didnt get live lat and lon i hard coded but in all other activities and fragments I used live data from viewmodel
-                    Algorithms.haversineDist( poi.lon, poi.lat,1.4037617, 50.90806832852336)
-                Log.d("MYtagy1", "Lon1: ${poi.lon} ,,${poi.lat},,${-1.4037617},,${50.90806832852336}")
+                    Algorithms.haversineDist( poi.lon, poi.lat,lon, lat)
 
                 if (dist < 50000) {
                     sendNotification(poi.name, poi.featureType)
                 }
-
-
             }
 
-             */
             overlay = ItemizedIconOverlay(requireContext(), items, null)
             map1.overlays.add(overlay)
 

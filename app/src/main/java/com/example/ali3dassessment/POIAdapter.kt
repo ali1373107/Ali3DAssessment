@@ -20,9 +20,6 @@ class POIAdapter(private var pois: List<POI>, private val context: Context,priva
 
     var proj = SphericalMercatorProjection()
 
-    lateinit var channel: NotificationChannel
-    var notificationId = 1
-    val channelID = "POI"
     private var lat: Double = 0.0
     private var lon: Double = 0.0
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -34,6 +31,7 @@ class POIAdapter(private var pois: List<POI>, private val context: Context,priva
         val view = LayoutInflater.from(parent.context).inflate(R.layout.poi_item, parent, false)
         poiViewModel.lat1.observeForever(latObserver)
         poiViewModel.lon1.observeForever(lonObserver)
+
         return ViewHolder(view)
     }
     private val latObserver = Observer<Double> { newLat ->
@@ -63,15 +61,14 @@ class POIAdapter(private var pois: List<POI>, private val context: Context,priva
         val dist = Algorithms.haversineDist(poi.lon,poi.lat,lon,lat)
         val distInKm = dist/1000
         val formattedDist = String.format("%.2f", distInKm) // Format to 2 decimal places
-        if (dist < 50000) {
-            sendNotification(poi.name, poi.featureType)
-        }
+
         holder.nameTextView.text = poi.name
         holder.typeTextView.text = poi.featureType
         holder.distancetextView.text = formattedDist
 
 // Bind other properties as needed
     }
+
     override fun getItemCount(): Int {
         return pois.size
     }
@@ -79,17 +76,6 @@ class POIAdapter(private var pois: List<POI>, private val context: Context,priva
         pois = newPois
         notifyDataSetChanged()
     }
-    private fun sendNotification(poiName: String, type: String) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notification = Notification.Builder(context, channelID)
-                .setContentTitle("Pois Nearby")
-                .setContentText("Name - $poiName Distance - $type")
-                .setSmallIcon(R.drawable.peak)
-                .build()
 
-            val nMgr = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            nMgr.notify(notificationId++, notification)
-        }
-    }
 
 }

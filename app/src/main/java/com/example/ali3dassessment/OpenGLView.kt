@@ -27,8 +27,10 @@ import javax.microedition.khronos.opengles.GL10
 
 class OpenGLView(ctx:Context, val lifecycleOwner: LifecycleOwner,
                  val textureAvailableCallback: (SurfaceTexture) ->Unit) :GLSurfaceView(ctx),GLSurfaceView.Renderer{
-    private var lat: Double = 0.0
-    private var lon: Double = 0.0
+
+   // i couldnt get the live lat and lon here that swhy i hard coded the value of the lat and lon
+    private var lat=50.90832
+    private var lon= -1.40038000000000
     var proj = SphericalMercatorProjection()
 
     private lateinit var poiViewModel: PoiViewModel
@@ -40,6 +42,7 @@ class OpenGLView(ctx:Context, val lifecycleOwner: LifecycleOwner,
 
     }
 
+    private var triangleList = mutableListOf<Triangle>()
 
     val gpu = GPUInterface("color shader")
     var fbuf :FloatBuffer? = null
@@ -52,7 +55,7 @@ class OpenGLView(ctx:Context, val lifecycleOwner: LifecycleOwner,
 
     var viewMatrix = GLMatrix()
     val projectionMatrix = GLMatrix()
-    val camera = Camera(95.33094371575862F,0f,107.97990605444647F)
+    val camera = Camera(lon.toFloat(),0f,lat.toFloat())
 
     var cameraFeedSurfaceTexure: SurfaceTexture? = null
     // For representing the current orientation matrix that will be changed to the correct version
@@ -68,6 +71,7 @@ class OpenGLView(ctx:Context, val lifecycleOwner: LifecycleOwner,
 
                 poiViewModel.lat1.observe(lifecycleOwner, latObserver)
                 poiViewModel.lon1.observe(lifecycleOwner, lonObserver)
+                getdata()
             }
         }
     }
@@ -76,17 +80,20 @@ class OpenGLView(ctx:Context, val lifecycleOwner: LifecycleOwner,
         //getting live list from view model to display triangle based on the poi lat and lon anter unprojing
         Handler(Looper.getMainLooper()).post {
             poiViewModel.allPois.observe(context as LifecycleOwner) { pois ->
+                triangleList.clear()
                 for(poi in pois){
-                    Log.d("POISD","${poi.name}")
+                    val trianglePoi = Triangle(poi.lon.toFloat(), 0f, poi.lat.toFloat())
+                    triangleList.add(trianglePoi)
+                    Log.d("POIoo","lot lon ${poi.lat}${poi.lon}")
+
                 }
+
             }
         }
     }
     override fun onSurfaceCreated(unused: GL10, config: EGLConfig){
-
         update()
-        getdata()
-
+        unprojLatLon()
         Log.d("OpemGLBasic"," ${lat}${lon}")
 
         GLES20.glClearColor(0.0f,0.0f,0.0f,1.0f)
@@ -127,24 +134,23 @@ class OpenGLView(ctx:Context, val lifecycleOwner: LifecycleOwner,
             1f, 1f, 0f
         )
         fbuf = OpenGLUtils.makeFloatBuffer(vertices2)
-        //val indices = shortArrayOf(0,1,2, 2,3,0)
-        // val indices1 = shortArrayOf(0,1,2,2,3,0)
+
         indexfbuf = OpenGLUtils.makeShortBuffer(shortArrayOf(0,1,2,2,3,0))
-        //  indexfbuf1 = OpenGLUtils.makeShortBuffer(shortArrayOf(0,1,3,3,1,2))
     }
     fun unprojLatLon(){
 
 //log lon and lat to ee we getting correct data
-        val p = LonLat(-1.40038000000000, 50.90832)
+        val p = LonLat(lon, lat)
         val en = proj.project(p)
         println("Easting: " + en.easting + " Northing: " + en.northing)
+        lon = en.easting
+        lat = en.easting
         Log.d("opengllon","${lon}")
         Log.d("opengllat","${lat}")
 
     }
     //actual scene drawing shoild go here
     override fun onDrawFrame(gl: GL10?){
-        getdata()
         //clear any previuse setting from previouse frame
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT or GLES20.GL_DEPTH_BUFFER_BIT)
         //GLES20.glDisable(GLES20.GL_DEPTH_TEST)
@@ -177,7 +183,7 @@ class OpenGLView(ctx:Context, val lifecycleOwner: LifecycleOwner,
             // Method call to set the view matrix to the correct sensor matrix
             viewMatrix.correctSensorMatrix()
 
-            unprojLatLon()
+
 
 
             gpu.select()
@@ -189,7 +195,13 @@ class OpenGLView(ctx:Context, val lifecycleOwner: LifecycleOwner,
 
             traingle.renderMulti(gpu)
 
-
+            val trianglesCopy = ArrayList(triangleList)
+            for (triangle in trianglesCopy) {
+                gpu.select()
+                gpu.sendMatrix(refUProj2, projectionMatrix)
+                gpu.sendMatrix(refUView2, viewMatrix)
+                triangle.renderMulti(gpu)
+            }
 
 
 
@@ -204,7 +216,6 @@ class OpenGLView(ctx:Context, val lifecycleOwner: LifecycleOwner,
         lon = newLon
         Log.d("MyTag111", "Updated Longitude in Activity: $lon")
     }
-    //its called whenever the resolution changes (on a mobile device this ill occur when the device i rotated
     override fun onSurfaceChanged(unused: GL10, w: Int, h:Int){
         getdata()
         GLES20.glViewport(0,0,w,h)

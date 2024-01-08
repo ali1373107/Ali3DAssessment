@@ -69,25 +69,15 @@ class MainActivity : AppCompatActivity() {
 
     var permissionsGranted = false
 
-    lateinit var channel: NotificationChannel
-    var notificationId = 1
-    val channelID = "POI"
 
-    var cameraFeedSurfaceTexure: SurfaceTexture? = null
     private var lat: Double = 0.0
     private var lon: Double = 0.0
-    // Declaring our sensor variables as attributes of the Main Activity
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         db = PoiDatabase.getDatabase(application)
         poiViewModel.lat1.observe(this, latObserver)
         poiViewModel.lon1.observe(this, lonObserver)
-        // Creating a sensor manager and initialising our sensors properly
-
-
 
         requestPermissions()
 
@@ -102,7 +92,7 @@ class MainActivity : AppCompatActivity() {
                     "sendLocation" -> {
                         var newlat = intent.getDoubleExtra("Servicelat", 0.0)
                         var newlon = intent.getDoubleExtra("Servicelon", 0.0)
-                   //     updateLocationOperations(newlat,newlon)
+
                         poiViewModel.updateLatLon(newlat, newlon)
 
                         Log.d("MyTag", "latvm${newlat}")
@@ -113,11 +103,7 @@ class MainActivity : AppCompatActivity() {
         }
         registerReceiver(receiver, filter)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            channel = NotificationChannel(channelID, "POI", NotificationManager.IMPORTANCE_DEFAULT)
-            val nMgr = getSystemService(Context.NOTIFICATION_SERVICE)as NotificationManager
-            nMgr.createNotificationChannel(channel)
-        }
+
 
     }
 
@@ -136,7 +122,6 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun updateLocationOperations() {
-
         Log.d("MyTag1", "lonbbox${lon}")
         Log.d("MyTag1", "latbbox${lat}")
         var west = lon - 0.01
@@ -187,6 +172,7 @@ class MainActivity : AppCompatActivity() {
                 lifecycleScope.launch {
                     withContext(Dispatchers.IO) {
                         updateLocationOperations()
+                        //created copy of the listPoi1
                         val copyList = ArrayList(listPoi1)
 
                         for (poi in copyList) {

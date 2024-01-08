@@ -30,12 +30,9 @@ class MyGPSService: Service(), LocationListener {
     var mgr: LocationManager? = null
     override fun onCreate() {
         super.onCreate()
-        poiViewModel = PoiViewModel(application) // Initialize your ViewModel here
+        poiViewModel = PoiViewModel(application) // Initializing ViewModel here
     }
-    // Need this for storing the new location when the user's location changes
     inner class GPSServiceBinder(val GPS_Service: MyGPSService): android.os.Binder()
- //   var lat = 0.0
-  //  var lon = 0.0
 
 
 
@@ -54,7 +51,6 @@ class MyGPSService: Service(), LocationListener {
 
 
     override fun onBind(intent: Intent?): IBinder? {
-        //return null // This is temporary, but needs to be changed so that the service can be bound to the Activity
         return GPSServiceBinder(this)
     }
 

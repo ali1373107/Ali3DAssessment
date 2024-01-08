@@ -23,25 +23,21 @@ class PoiViewModel(application: Application) : AndroidViewModel(application) {
         getPoisByType()
     }
     public fun updateLatLon(newLat: Double, newLon: Double) {
-        // Example logic to set lat and lon
-        _lat.postValue(newLat)  // Example latitude (replace with your actual logic)
-        _lon.postValue(newLon) // Example longitude (replace with your actual logic)
+        // logic to set lat and lon
+        _lat.postValue(newLat)
+        _lon.postValue(newLon)
 
     }
-
-// Return the LiveData for observation
-
     public fun getPoisByType() {
         viewModelScope.launch(Dispatchers.IO) {
             // we use view model poitype to search by type
-           val updatedList = if (poitype=="") {
+           val updatedList = if (poitype==""||poitype=="all") {
                 db.PoiDao().getAllpois()
             } else {
                 Log.d("POI Type2:", "$poitype")
                 db.PoiDao().getPoiByType(poitype)
             }
 // Use 'value' to update LiveData
-
             _poiList.postValue(updatedList) }
 
     }

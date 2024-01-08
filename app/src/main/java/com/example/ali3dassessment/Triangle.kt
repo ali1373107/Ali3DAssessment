@@ -24,9 +24,9 @@ class Triangle(val x: Float, val y: Float, val z: Float) {
                 x, y + 0.5f, z,
                 1f, 0f, 0f,
                 x - 0.5f, y - 0.5f, z,
-                0f, 1f, 0f,
+                1f, 0f, 0f,
                 x + 0.5f, y - 0.5f, z,
-                0f, 0f, 1f
+                1f, 0f, 0f,
             )
         )
 
